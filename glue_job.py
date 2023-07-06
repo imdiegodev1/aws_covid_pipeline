@@ -10,13 +10,28 @@ BUCKET_NAME = "covid-pipeline-learning"
 OUTPUT_FOLDER = "staging_data"
 STAGING_FOLDER = f"s3://{BUCKET_NAME}/{OUTPUT_FOLDER}/"
 
-
 athena_client = boto3.client(
     "athena",
     region_name=AWS_REGION
     )
 
-dict = {}
+print(type(athena_client))
+
+def main():
+    
+    dict = {}
+
+    query_enigma_jhud = "SELECT * FROM enigma_jhud"
+
+    enigma_jhud = download_load_query_results(athena_client,
+                                          create_response(athena_client,
+                                                          query_enigma_jhud,
+                                                          SCHEMA_NAME,
+                                                          STAGING_FOLDER))
+    
+    print(enigma_jhud)
+
+
 
 def download_load_query_results(
         client: boto3.client,
@@ -49,14 +64,29 @@ def download_load_query_results(
 
     return pd.read_csv(temp_file_location)
 
-response = athena_client.start_query_execution(
-    QueryString = "SELECT * FROM enigma_jhud",
-    QueryExecutionContext={"Database": SCHEMA_NAME},
-    ResultConfiguration= {
-        "OutputLocation": STAGING_FOLDER,
-    },
-)
+def create_response(athena_client: boto3.client,
+                    query: str,
+                    schema_name: str,
+                    staging_folder: str):
+    
+    response = athena_client.start_query_execution(
+        QueryString = query,
+        QueryExecutionContext={"Database": schema_name},
+        ResultConfiguration= {
+            "OutputLocation": staging_folder,
+        },
+    )
 
-df_data = download_load_query_results(athena_client, response)
+    print(type(response))
 
-print(df_data)
+    return response
+
+
+
+#df_data = download_load_query_results(athena_client, response)
+
+#print(df_data)
+
+if __name__ == '__main__':
+
+    main()
