@@ -7,7 +7,7 @@ DIRECTORIES = ["enigma-jhud", "enigma-nytimes-data-in-usa/us_county",
 def main():
 
     s3_connection = connection()
-    #create_bucket(s3_connection, BUCKET_NAME)
+    create_bucket(s3_connection, BUCKET_NAME)
     create_folders(s3_connection, BUCKET_NAME, DIRECTORIES)
 
 #Connection
